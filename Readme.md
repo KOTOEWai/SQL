@@ -7,19 +7,7 @@
 - [What is SQL?](#what-is-sql)
 - [SQL Introduction](#sql-introduction)
 - [SQL ၏ အဓိက အမျိုးအစားများ](#sql-၏-အဓိက-အမျိုးအစားများ)
-- [အခြေခံ Commands များ](#အခြေခံ-commands-များ)
-  - [CREATE & INSERT](#database-နှင့်-table-ဖန်တီးခြင်း-ddl)
-  - [SELECT](#data-ရှာဖွေခြင်း-select)
-  - [UPDATE](#data-ပြင်ဆင်ခြင်း-update)
-  - [DELETE](#data-ဖျက်ခြင်း-delete)
-- [WHERE Clause](#where-clause-အသေးစိတ်)
-- [Aggregate Functions](#aggregate-functions)
-- [JOIN များ](#join-များ)
-- [Constraints](#constraints-ကန့်သတ်ချက်များ)
-- [Subquery](#subquery)
-- [အသုံးဝင်သောနည်းပညာများ](#အသုံးဝင်သောနည်းပညာများ)
-- [လေ့ကျင့်ရန် နမူနာ Queries](#လေ့ကျင့်ရန်-နမူနာ-queries)
-- [နောက်ထပ် လေ့လာရန်](#နောက်ထပ်-လေ့လာရန်-အကြံပြုချက်)
+- [SQL Data Types](#sql-data-types)
 
 ---
 
@@ -87,6 +75,7 @@ LIMIT   10;                -- မည်မျှ ယူမည်
 
 ---
 
+
 ## SQL ၏ အဓိက အမျိုးအစားများ
 
 | အမျိုးအစား | အမည် | ဥပမာ Command များ |
@@ -100,264 +89,115 @@ LIMIT   10;                -- မည်မျှ ယူမည်
 
 ---
 
-## အခြေခံ Commands များ
+## SQL Data Types
 
-### Database နှင့် Table ဖန်တီးခြင်း (DDL)
+SQL တွင် Column တစ်ခုချင်းဆီတွင် မည်သည့် Data မျိုးကို သိမ်းဆည်းမည်ဆိုသည်ကို **Data Type** ဖြင့် သတ်မှတ်သည်။
+
+---
+
+### 1. Numeric Types (ဂဏန်းဆိုင်ရာ)
+
+| Data Type | ရှင်းလင်းချက် | ဥပမာ |
+|---|---|---|
+| `INT` | ကိန်းဂဏန်း (−2B မှ 2B) | `age INT` |
+| `TINYINT` | သေးငယ်သော ကိန်းဂဏန်း (0−255) | `is_active TINYINT` |
+| `BIGINT` | ကြီးမားသော ကိန်းဂဏန်း | `population BIGINT` |
+| `FLOAT` | ကိုက်ကိန်း (သတ်မှတ်ချက်မဲ့) | `height FLOAT` |
+| `DOUBLE` | ကိုက်ကိန်း (ပိုမှန်ကန်) | `price DOUBLE` |
+| `DECIMAL(p,s)` | တိကျသော ကိုက်ကိန်း | `salary DECIMAL(10,2)` |
 
 ```sql
--- Database တစ်ခုဖန်တီးခြင်း
-CREATE DATABASE school;
+CREATE TABLE products (
+    id       INT PRIMARY KEY AUTO_INCREMENT,
+    quantity INT,
+    price    DECIMAL(10, 2),   -- 10 digit, 2 နောက်ကျောင်း
+    weight   FLOAT
+);
+```
 
--- Database ကိုသုံးခြင်း
-USE school;
+---
 
--- Table တစ်ခုဖန်တီးခြင်း
-CREATE TABLE students (
+### 2. String Types (စာသားဆိုင်ရာ)
+
+| Data Type | ရှင်းလင်းချက် | ဥပမာ |
+|---|---|---|
+| `CHAR(n)` | ပုံသေ အရှည် စာကြောင်း | `gender CHAR(1)` |
+| `VARCHAR(n)` | အပြောင်းအလဲ အရှည် စာကြောင်း | `name VARCHAR(100)` |
+| `TEXT` | ရှည်သော စာသား (64KB) | `description TEXT` |
+| `MEDIUMTEXT` | အလတ်စား စာသား (16MB) | `article MEDIUMTEXT` |
+| `LONGTEXT` | ကြီးမားသော စာသား (4GB) | `content LONGTEXT` |
+| `ENUM` | သတ်မှတ်ထားသော တန်ဖိုးများ | `status ENUM(...)` |
+
+```sql
+CREATE TABLE users (
+    id       INT PRIMARY KEY AUTO_INCREMENT,
+    name     VARCHAR(100),              -- အများဆုံး 100 လုံး
+    gender   CHAR(1),                  -- 'M' သို့ 'F'
+    bio      TEXT,                     -- ရှည်သော ကိုယ်ရေးအကျဉ်း
+    status   ENUM('active', 'inactive', 'banned')
+);
+```
+
+> **CHAR vs VARCHAR**
+> - `CHAR(10)` — "Hi" သိမ်းလျှင် 10 bytes အမြဲသုံးသည်
+> - `VARCHAR(10)` — "Hi" သိမ်းလျှင် 2 bytes သာ သုံးသည် (သက်သာသည်)
+
+---
+
+### 3. Date & Time Types (ရက်စွဲနှင့် အချိန်)
+
+| Data Type | ပုံစံ | ဥပမာတန်ဖိုး |
+|---|---|---|
+| `DATE` | `YYYY-MM-DD` | `2025-04-21` |
+| `TIME` | `HH:MM:SS` | `10:30:00` |
+| `DATETIME` | `YYYY-MM-DD HH:MM:SS` | `2025-04-21 10:30:00` |
+| `TIMESTAMP` | `YYYY-MM-DD HH:MM:SS` | Auto-update လုပ်နိုင် |
+| `YEAR` | `YYYY` | `2025` |
+
+```sql
+CREATE TABLE orders (
+    id           INT PRIMARY KEY AUTO_INCREMENT,
+    order_date   DATE,
+    order_time   TIME,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+---
+
+### 4. Boolean Type
+
+MySQL တွင် `BOOLEAN` သည် `TINYINT(1)` ဖြင့် သိမ်းဆည်းသည်။
+
+```sql
+CREATE TABLE tasks (
     id         INT PRIMARY KEY AUTO_INCREMENT,
-    name       VARCHAR(100) NOT NULL,
-    age        INT,
-    grade      CHAR(1),
-    email      VARCHAR(150) UNIQUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    title      VARCHAR(200),
+    is_done    BOOLEAN DEFAULT FALSE   -- 0 = false, 1 = true
 );
+
+-- Insert example
+INSERT INTO tasks (title, is_done) VALUES ('Learn SQL', TRUE);
+INSERT INTO tasks (title, is_done) VALUES ('Learn Python', FALSE);
 ```
-
-### Data ထည့်သွင်းခြင်း (INSERT)
-
-```sql
--- တစ်ကြောင်းတည်း ထည့်သွင်း
-INSERT INTO students (name, age, grade, email)
-VALUES ('Mg Mg', 20, 'A', 'mgmg@example.com');
-
--- တစ်ကြောင်းထက်မက ထည့်သွင်း
-INSERT INTO students (name, age, grade, email)
-VALUES
-    ('Su Su',   19, 'B', 'susu@example.com'),
-    ('Ko Ko',   21, 'A', 'koko@example.com'),
-    ('Ma Hnin', 22, 'C', 'mahnin@example.com');
-```
-
-### Data ရှာဖွေခြင်း (SELECT)
-
-```sql
--- Column အားလုံး ကြည့်ခြင်း
-SELECT * FROM students;
-
--- သတ်မှတ် Column များသာ ကြည့်ခြင်း
-SELECT name, age, grade FROM students;
-
--- စစ်ထုတ်ခြင်း (WHERE)
-SELECT * FROM students WHERE grade = 'A';
-
--- စီစဉ်ခြင်း (ORDER BY)
-SELECT * FROM students ORDER BY age ASC;   -- ငယ်မှကြီး
-SELECT * FROM students ORDER BY age DESC;  -- ကြီးမှငယ်
-
--- အကန့်အသတ်ဖြင့် ယူခြင်း (LIMIT)
-SELECT * FROM students LIMIT 5;
-```
-
-### Data ပြင်ဆင်ခြင်း (UPDATE)
-
-```sql
-UPDATE students
-SET grade = 'A', age = 23
-WHERE id = 3;
-```
-
-> **သတိပေးချက်**: `WHERE` မပါဘဲ `UPDATE` လုပ်ပါက Row **အားလုံး** ပြောင်းသွားမည်!
-
-### Data ဖျက်ခြင်း (DELETE)
-
-```sql
--- တစ်ကြောင်းတည်း ဖျက်ပစ်ခြင်း
-DELETE FROM students WHERE id = 2;
-
--- Record အားလုံး ဖျက် (Table structure ကျန်)
-DELETE FROM students;
-
--- Table အပြည့်အဝ ရှင်းလင်းခြင်း
-TRUNCATE TABLE students;
-```
-
-[Back to Top](#sql-structured-query-language)
 
 ---
 
-## WHERE Clause အသေးစိတ်
+### 5. Data Type ရွေးချယ်ရန် လမ်းညွှန်
 
-```sql
--- နှိုင်းယှဉ် Operators
-SELECT * FROM students WHERE age > 20;
-SELECT * FROM students WHERE age >= 20;
-SELECT * FROM students WHERE age != 20;
-
--- AND / OR
-SELECT * FROM students WHERE age > 18 AND grade = 'A';
-SELECT * FROM students WHERE grade = 'A' OR grade = 'B';
-
--- BETWEEN
-SELECT * FROM students WHERE age BETWEEN 18 AND 22;
-
--- IN
-SELECT * FROM students WHERE grade IN ('A', 'B');
-
--- LIKE (pattern ရှာဖွေခြင်း)
-SELECT * FROM students WHERE name LIKE 'Mg%';   -- Mg နှင့်စသော
-SELECT * FROM students WHERE name LIKE '%Ko';   -- Ko နှင့်ဆုံးသော
-SELECT * FROM students WHERE name LIKE '%u%';   -- u ပါသော
-
--- NULL စစ်ဆေးခြင်း
-SELECT * FROM students WHERE email IS NULL;
-SELECT * FROM students WHERE email IS NOT NULL;
-```
+| သိမ်းဆည်းမည့် Data | အသုံးပြုသင့်သော Type |
+|---|---|
+| ID, ဦးရေ, သက်တမ်း | `INT` |
+| ငွေကြေး, ဈေးနှုန်း | `DECIMAL(10,2)` |
+| အမည်, ခေါင်းစဉ် | `VARCHAR(100-255)` |
+| ရှည်သော ဖော်ပြချက် | `TEXT` |
+| ရက်စွဲသာ | `DATE` |
+| ရက်စွဲ + အချိန် | `DATETIME` |
+| မှန်/မှားသာ | `BOOLEAN` |
+| သတ်မှတ်ထားသော ရွေးချယ်မှု | `ENUM` |
 
 [Back to Top](#sql-structured-query-language)
-
----
-
-## Aggregate Functions
-
-```sql
-SELECT COUNT(*) AS total_students FROM students;        -- ဦးရေ
-SELECT AVG(age)  AS average_age   FROM students;        -- ပျမ်းမျှ
-SELECT MAX(age)  AS oldest        FROM students;        -- အကြီးဆုံး
-SELECT MIN(age)  AS youngest      FROM students;        -- အငယ်ဆုံး
-SELECT SUM(age)  AS total_age     FROM students;        -- ပေါင်းလဒ်
-
--- Grade အလိုက် အုပ်စုဖွဲ့ ရေတွက် (GROUP BY)
-SELECT grade, COUNT(*) AS count
-FROM students
-GROUP BY grade;
-
--- GROUP BY အပြီး စစ်ထုတ်ခြင်း (HAVING)
-SELECT grade, COUNT(*) AS count
-FROM students
-GROUP BY grade
-HAVING COUNT(*) > 1;
-```
-
-[Back to Top](#sql-structured-query-language)
-
----
-
-## JOIN များ
-
-```sql
--- ဥပမာ Table ဖန်တီးခြင်း
-CREATE TABLE courses (
-    id         INT PRIMARY KEY AUTO_INCREMENT,
-    name       VARCHAR(100),
-    student_id INT,
-    FOREIGN KEY (student_id) REFERENCES students(id)
-);
-```
-
-### INNER JOIN — နှစ်ဖက်လုံးတွင် ကိုက်ညီသော record များ
-
-```sql
-SELECT s.name, c.name AS course
-FROM students s
-INNER JOIN courses c ON s.id = c.student_id;
-```
-
-### LEFT JOIN — ဘယ်ဘက် Table အားလုံး
-
-```sql
-SELECT s.name, c.name AS course
-FROM students s
-LEFT JOIN courses c ON s.id = c.student_id;
-```
-
-### RIGHT JOIN — ညာဘက် Table အားလုံး
-
-```sql
-SELECT s.name, c.name AS course
-FROM students s
-RIGHT JOIN courses c ON s.id = c.student_id;
-```
-
-[Back to Top](#sql-structured-query-language)
-
----
-
-## Constraints (ကန့်သတ်ချက်များ)
-
-```sql
-CREATE TABLE employees (
-    id       INT PRIMARY KEY AUTO_INCREMENT,      -- Unique identifier
-    emp_code VARCHAR(10) UNIQUE,                  -- ထပ်တူမရှိနိုင်
-    name     VARCHAR(100) NOT NULL,               -- NULL မဖြစ်ရ
-    salary   DECIMAL(10,2) DEFAULT 0.00,          -- Default တန်ဖိုး
-    dept_id  INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(id)
-);
-```
-
-[Back to Top](#sql-structured-query-language)
-
----
-
-## Subquery
-
-Query တစ်ခုထဲတွင် Query တစ်ခုထပ်ထည့်ခြင်း
-
-```sql
--- Grade 'A' ရသော ကျောင်းသားများ၏ courses ကိုကြည့်ခြင်း
-SELECT * FROM courses
-WHERE student_id IN (
-    SELECT id FROM students WHERE grade = 'A'
-);
-```
-
-[Back to Top](#sql-structured-query-language)
-
----
-
-## အသုံးဝင်သောနည်းပညာများ
-
-```sql
--- DISTINCT - ထပ်တူများ ဖယ်ရှားခြင်း
-SELECT DISTINCT grade FROM students;
-
--- ALIAS - ခေါင်းစဉ် ပြောင်းလဲခြင်း
-SELECT name AS 'ကျောင်းသားအမည်', age AS 'အသက်' FROM students;
-
--- String Functions
-SELECT UPPER(name)                    FROM students;  -- အကြီးစာ
-SELECT LOWER(name)                    FROM students;  -- အသေးစာ
-SELECT LENGTH(name)                   FROM students;  -- စာလုံးရေ
-SELECT CONCAT(name, ' - ', grade)     FROM students;  -- ပေါင်းစပ်
-
--- Date Functions
-SELECT NOW();                                         -- လက်ရှိ DateTime
-SELECT CURDATE();                                     -- လက်ရှိ Date
-SELECT YEAR(created_at) FROM students;                -- နှစ်ကိုထုတ်ယူ
-```
-
-[Back to Top](#sql-structured-query-language)
-
----
-
-## လေ့ကျင့်ရန် နမူနာ Queries
-
-```sql
--- ကျောင်းသား မှတ်ပုံတင်စာရင်း အပြည့်အစုံ
-SELECT
-    s.id,
-    s.name,
-    s.age,
-    s.grade,
-    COUNT(c.id) AS total_courses
-FROM students s
-LEFT JOIN courses c ON s.id = c.student_id
-GROUP BY s.id, s.name, s.age, s.grade
-ORDER BY s.grade ASC, s.name ASC;
-```
-
-[Back to Top](#sql-structured-query-language)
-
----
 
 ## နောက်ထပ် လေ့လာရန် အကြံပြုချက်
 
