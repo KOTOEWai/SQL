@@ -9,6 +9,7 @@
 - [SQL ၏ အဓိက အမျိုးအစားများ](#sql-၏-အဓိက-အမျိုးအစားများ)
 - [SQL Data Types](#sql-data-types)
 - [SQL: Querying Data With SELECT ](#SQL-Querying-Data-With-SELECT)
+- [SQL: Joining Tables](#SQL-Joining-Tables)
 ---
 
 ## What is SQL?
@@ -348,6 +349,180 @@ LIMIT 10;
 ```
 
 [Back to Top](#sql-structured-query-language)
+
+## SQL Joining Tables
+
+Table တစ်ခုထက်မက ရှိသော Data များကို တစ်ပေါင်းတည်း ထုတ်ယူရန် **JOIN** ကိုသုံးသည်။ JOIN သည် Table နှစ်ခု (သို့မဟုတ်) ထိုထက်မကကို **Foreign Key** ဖြင့် ချိတ်ဆက်သည်။
+
+---
+
+### ဥပမာ Tables
+
+```sql
+-- students table
+CREATE TABLE students (
+    id    INT PRIMARY KEY,
+    name  VARCHAR(100),
+    dept_id INT
+);
+
+-- departments table
+CREATE TABLE departments (
+    id   INT PRIMARY KEY,
+    name VARCHAR(100)
+);
+```
+
+**students data:**
+
+| id | name   | dept_id |
+|----|--------|---------|
+| 1  | Mg Mg  | 1       |
+| 2  | Su Su  | 2       |
+| 3  | Ko Ko  | NULL    |
+
+**departments data:**
+
+| id | name        |
+|----|-------------|
+| 1  | Computer    |
+| 2  | Mathematics |
+| 3  | Physics     |
+
+---
+
+### INNER JOIN
+
+နှစ်ဖက် Table နှစ်ခုလုံးတွင် **ကိုက်ညီသော** record များသာ ပြသည်။
+
+```sql
+SELECT s.name, d.name AS department
+FROM students s
+INNER JOIN departments d ON s.dept_id = d.id;
+```
+
+**ရလဒ်:**
+
+| name  | department  |
+|-------|-------------|
+| Mg Mg | Computer    |
+| Su Su | Mathematics |
+
+> Ko Ko ကို မပြ — dept_id က NULL ဖြစ်သောကြောင့်
+
+---
+
+### LEFT JOIN
+
+**ဘယ်ဘက် Table (students)** ၏ record အားလုံး ပြသည်။ ညာဘက် Table နှင့် မကိုက်ပါက `NULL` ဖြင့် ဖြည့်သည်။
+
+```sql
+SELECT s.name, d.name AS department
+FROM students s
+LEFT JOIN departments d ON s.dept_id = d.id;
+```
+
+**ရလဒ်:**
+
+| name  | department  |
+|-------|-------------|
+| Mg Mg | Computer    |
+| Su Su | Mathematics |
+| Ko Ko | NULL        |
+
+---
+
+### RIGHT JOIN
+
+**ညာဘက် Table (departments)** ၏ record အားလုံး ပြသည်။ ဘယ်ဘက် Table နှင့် မကိုက်ပါက `NULL` ဖြင့် ဖြည့်သည်။
+
+```sql
+SELECT s.name, d.name AS department
+FROM students s
+RIGHT JOIN departments d ON s.dept_id = d.id;
+```
+
+**ရလဒ်:**
+
+| name  | department  |
+|-------|-------------|
+| Mg Mg | Computer    |
+| Su Su | Mathematics |
+| NULL  | Physics     |
+
+---
+
+### FULL OUTER JOIN
+
+နှစ်ဖက် Table နှစ်ခုလုံးမှ record **အားလုံး** ပြသည်။ မကိုက်သောနေရာ `NULL` ဖြည့်သည်။
+
+```sql
+-- MySQL တွင် FULL OUTER JOIN မရှိသောကြောင့် UNION ဖြင့် လုပ်ရသည်
+SELECT s.name, d.name AS department
+FROM students s
+LEFT JOIN departments d ON s.dept_id = d.id
+
+UNION
+
+SELECT s.name, d.name AS department
+FROM students s
+RIGHT JOIN departments d ON s.dept_id = d.id;
+```
+
+**ရလဒ်:**
+
+| name  | department  |
+|-------|-------------|
+| Mg Mg | Computer    |
+| Su Su | Mathematics |
+| Ko Ko | NULL        |
+| NULL  | Physics     |
+
+---
+
+### SELF JOIN
+
+Table တစ်ခုကို **မိမိကိုယ်တိုင် နှင့်** JOIN ခြင်း
+
+```sql
+-- employees table တွင် manager_id = boss ၏ employee id
+SELECT
+    e.name  AS employee,
+    m.name  AS manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.id;
+```
+
+---
+
+### JOIN များ နှိုင်းယှဉ်ချက်
+
+| JOIN အမျိုးအစား | ဘာပြသနည်း |
+|---|---|
+| `INNER JOIN` | နှစ်ဖက်ကိုက်ညီသောရာများ |
+| `LEFT JOIN` | ဘယ်ဘက်အားလုံး + ညာဘက်ကိုက်သောရာ |
+| `RIGHT JOIN` | ညာဘက်အားလုံး + ဘယ်ဘက်ကိုက်သောရာ |
+| `FULL OUTER JOIN` | နှစ်ဖက်အားလုံး |
+| `SELF JOIN` | မိမိကိုမိမိ JOIN |
+
+---
+
+### Table သုံးခု JOIN ခြင်း
+
+```sql
+SELECT
+    s.name        AS student,
+    d.name        AS department,
+    c.name        AS course
+FROM students s
+INNER JOIN departments d ON s.dept_id  = d.id
+INNER JOIN courses     c ON c.dept_id  = d.id
+ORDER BY s.name;
+```
+
+[Back to Top](#sql-structured-query-language)
+
+---
 
 ## နောက်ထပ် လေ့လာရန် အကြံပြုချက်
 
