@@ -10,6 +10,7 @@
 - [SQL Data Types](#sql-data-types)
 - [SQL: Querying Data With SELECT ](#SQL-Querying-Data-With-SELECT)
 - [SQL: Joining Tables](#SQL-Joining-Tables)
+- [SQL: Data Aggregation and Grouping ](#SQL-Data-Aggregation-and-Grouping)
 ---
 
 ## What is SQL?
@@ -523,6 +524,104 @@ ORDER BY s.name;
 [Back to Top](#sql-structured-query-language)
 
 ---
+## SQL Data Aggregation and Grouping
+
+`Aggregation` ဆိုတာ Row များကို အစုလိုက်တွက်ချက်ပြီး summary value တစ်ခု (သို့) တချို့ ထုတ်ယူခြင်းဖြစ်သည်။  
+`Grouping` ဆိုတာ data ကို category အလိုက် အုပ်စုခွဲပြီး အုပ်စုတစ်စုချင်းစီအတွက် aggregation လုပ်ခြင်းဖြစ်သည်။
+
+---
+
+### Aggregate Functions (အဓိက Functions များ)
+
+| Function | ဘာလုပ်သလဲ |
+|---|---|
+| `COUNT()` | Row အရေအတွက်တွက်သည် |
+| `SUM()` | Column တန်ဖိုးများကို ပေါင်းသည် |
+| `AVG()` | ပျမ်းမျှတန်ဖိုးတွက်သည် |
+| `MIN()` | အနည်းဆုံးတန်ဖိုးယူသည် |
+| `MAX()` | အများဆုံးတန်ဖိုးယူသည် |
+
+---
+
+### Aggregation Example (မခွဲဘဲ စုစည်းတွက်ခြင်း)
+
+```sql
+SELECT
+    COUNT(*)      AS total_orders,
+    SUM(amount)   AS total_amount,
+    AVG(amount)   AS avg_amount,
+    MIN(amount)   AS min_amount,
+    MAX(amount)   AS max_amount
+FROM orders;
+```
+
+အထက်ပါ query သည် `orders` table တစ်ခုလုံးကို summary အနေနှင့် တစ်ကြောင်းတည်း ပြန်ထုတ်ပေးသည်။
+
+---
+
+### GROUP BY (အုပ်စုခွဲပြီး Aggregation လုပ်ခြင်း)
+
+`GROUP BY` ကိုသုံးပြီး column တစ်ခု (သို့) အများကြီးအလိုက် အုပ်စုခွဲနိုင်သည်။
+
+```sql
+SELECT
+    customer_id,
+    COUNT(*)    AS order_count,
+    SUM(amount) AS total_spent
+FROM orders
+GROUP BY customer_id
+ORDER BY total_spent DESC;
+```
+
+ဒီ query သည် customer တစ်ယောက်ချင်းစီအလိုက် order count နဲ့ စုစုပေါင်းအသုံးစရိတ်ကို ပြသည်။
+
+---
+
+### WHERE vs HAVING
+
+- `WHERE` သည် Row များကို **grouping မလုပ်မီ** filter လုပ်သည်
+- `HAVING` သည် Group result များကို **grouping ပြီးမှ** filter လုပ်သည်
+
+```sql
+SELECT
+    customer_id,
+    SUM(amount) AS total_spent
+FROM orders
+WHERE status = 'paid'
+GROUP BY customer_id
+HAVING SUM(amount) > 1000;
+```
+
+ဒီ query မှာ:
+
+- `WHERE status = 'paid'` ဖြင့် paid orders များကို အရင်စစ်ထုတ်သည်
+- `GROUP BY customer_id` ဖြင့် customer အလိုက်အုပ်စုခွဲသည်
+- `HAVING SUM(amount) > 1000` ဖြင့် စုစုပေါင်း 1000 ကျော်သော group များကိုပဲ ရွေးသည်
+
+---
+
+### GROUP BY Columns အများကြီး သုံးခြင်း
+
+```sql
+SELECT
+    department_id,
+    job_title,
+    AVG(salary) AS avg_salary
+FROM employees
+GROUP BY department_id, job_title
+ORDER BY department_id, avg_salary DESC;
+```
+
+ဤပုံစံသည် `department_id` နှင့် `job_title` အတွဲအလိုက် salary ပျမ်းမျှကိုတွက်သည်။
+
+---
+
+### အကျဉ်းချုပ်
+
+- Aggregation = data အများကို summary ထုတ်ခြင်း
+- Grouping = data ကို group ခွဲပြီး summary ထုတ်ခြင်း
+- Group condition စစ်ချင်လျှင် `HAVING` ကိုသုံးပါ
+- Row-level condition စစ်ချင်လျှင် `WHERE` ကိုသုံးပါ
 
 ## နောက်ထပ် လေ့လာရန် အကြံပြုချက်
 
